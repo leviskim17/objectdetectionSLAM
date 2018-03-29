@@ -1,22 +1,5 @@
-/*
- * This file is part of ElasticFusion.
- *
- * Copyright (C) 2015 Imperial College London
- * 
- * The use of the code within this file and all code within files that 
- * make up the software that is ElasticFusion is permitted for 
- * non-commercial purposes only.  The full terms and conditions that 
- * apply to the code within this file are detailed within the LICENSE.txt 
- * file and at <http://www.imperial.ac.uk/dyson-robotics-lab/downloads/elastic-fusion/elastic-fusion-license/> 
- * unless explicitly stated.  By downloading this file you agree to 
- * comply with these terms.
- *
- * If you wish to use any of this code for commercial purposes then 
- * please email researchcontracts.engineering@imperial.ac.uk.
- *
- */
- 
-#include "MainController.h"
+
+ #include "MainController.h"
 
 MainController::MainController(int argc, char * argv[])
  : good(true),
@@ -25,7 +8,6 @@ MainController::MainController(int argc, char * argv[])
    groundTruthOdometry(0),
    logReader(0),
    framesToSkip(0),
-   resetButton(false),
    resizeStream(0)
 {
     std::string empty;
@@ -34,7 +16,8 @@ MainController::MainController(int argc, char * argv[])
     std::string calibrationFile;
     Parse::get().arg(argc, argv, "-cal", calibrationFile);
 
-    Resolution::getInstance(512, 424);//Resolution::getInstance(640, 480);
+    //Resolution::getInstance(640, 480);
+    Resolution::getInstance(512, 424);
 
     if(calibrationFile.length())
     {
@@ -42,7 +25,8 @@ MainController::MainController(int argc, char * argv[])
     }
     else
     {
-        Intrinsics::getInstance(364.531494, 364.531494, 256.237396, 207.297302);//Intrinsics::getInstance(528, 528, 320, 240);
+        //Intrinsics::getInstance(528, 528, 320, 240);
+        Intrinsics::getInstance(364.531494, 364.531494, 256.237396, 207.297302);
     }
 
     Parse::get().arg(argc, argv, "-l", logFile);
@@ -169,52 +153,41 @@ void MainController::loadCalibration(const std::string & filename)
 
     int n = sscanf(line.c_str(), "%lg %lg %lg %lg", &fx, &fy, &cx, &cy);
 
-    assert(n == 4 && "Ooops, your calibration file should contain a single line with fx fy cx cy!");
+    assert(n == 4 && "your calibration file should contain a single line with fx fy cx cy!");
 
     Intrinsics::getInstance(fx, fy, cx, cy);
 }
 
 void MainController::launch()
 {
-    while(good)
+    if(eFusion)
     {
-        if(eFusion)
-        {
-            run();
-        }
+        delete eFusion;
+        eFusion = NULL;
+    }
 
-        if(eFusion == 0 || resetButton)
-        {
-            resetButton = false;
+    logReader->rewind();
 
-            if(eFusion)
-            {
-                delete eFusion;
-            }
+    eFusion = new ElasticFusion(openLoop ? std::numeric_limits<int>::max() / 2 : timeDelta,
+                                icpCountThresh,
+                                icpErrThresh,
+                                covThresh,
+                                !openLoop,
+                                iclnuim,
+                                reloc,
+                                photoThresh,
+                                confidence,
+                                depth,
+                                icp,
+                                fastOdom,
+                                fernThresh,
+                                so3,
+                                frameToFrameRGB,
+                                logReader->getFile());
 
-            logReader->rewind();
-            eFusion = new ElasticFusion(openLoop ? std::numeric_limits<int>::max() / 2 : timeDelta,
-                                        icpCountThresh,
-                                        icpErrThresh,
-                                        covThresh,
-                                        !openLoop,
-                                        iclnuim,
-                                        reloc,
-                                        photoThresh,
-                                        confidence,
-                                        depth,
-                                        icp,
-                                        fastOdom,
-                                        fernThresh,
-                                        so3,
-                                        frameToFrameRGB,
-                                        logReader->getFile());
-        }
-        else
-        {
-            break;
-        }
-
+    if(eFusion)
+    {
+        run();
     }
 }
 
@@ -536,8 +509,6 @@ void MainController::run()
         eFusion->setSo3(gui->so3->Get());
         eFusion->setFrameToFrameRGB(gui->frameToFrameRGB->Get());
 
-        resetButton = pangolin::Pushed(*gui->reset);
-
         if(gui->autoSettings)
         {
             static bool last = gui->autoSettings->Get();
@@ -551,16 +522,17 @@ void MainController::run()
 
         Stopwatch::getInstance().sendAll();
 
-        if(resetButton)
+        if(pangolin::Pushed(*gui->reset))
         {
-            break;
+            logReader->rewind();
+            eFusion->setTick(0);
         }
-
+/*
         if(pangolin::Pushed(*gui->save))
         {
             eFusion->savePly();
         }
-
+*/
         TOCK("GUI");
     }
 }

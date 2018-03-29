@@ -1,21 +1,3 @@
-/*
- * This file is part of ElasticFusion.
- *
- * Copyright (C) 2015 Imperial College London
- * 
- * The use of the code within this file and all code within files that 
- * make up the software that is ElasticFusion is permitted for 
- * non-commercial purposes only.  The full terms and conditions that 
- * apply to the code within this file are detailed within the LICENSE.txt 
- * file and at <http://www.imperial.ac.uk/dyson-robotics-lab/downloads/elastic-fusion/elastic-fusion-license/> 
- * unless explicitly stated.  By downloading this file you agree to 
- * comply with these terms.
- *
- * If you wish to use any of this code for commercial purposes then 
- * please email researchcontracts.engineering@imperial.ac.uk.
- *
- */
- 
 #include "ElasticFusion.h"
 
 ElasticFusion::ElasticFusion(const int timeDelta,
@@ -84,55 +66,10 @@ ElasticFusion::ElasticFusion(const int timeDelta,
     createTextures();
     createCompute();
     createFeedbackBuffers();
-
-    std::string filename = fileName;
-    filename.append(".freiburg");
-
-    std::ofstream file;
-    file.open(filename.c_str(), std::fstream::out);
-    file.close();
-
-    Stopwatch::getInstance().setCustomSignature(12431231);
 }
 
 ElasticFusion::~ElasticFusion()
 {
-    if(iclnuim)
-    {
-        savePly();
-    }
-
-    //Output deformed pose graph
-    std::string fname = saveFilename;
-    fname.append(".freiburg");
-
-    std::ofstream f;
-    f.open(fname.c_str(), std::fstream::out);
-
-    for(size_t i = 0; i < poseGraph.size(); i++)
-    {
-        std::stringstream strs;
-
-        if(iclnuim)
-        {
-            strs << std::setprecision(6) << std::fixed << (double)poseLogTimes.at(i) << " ";
-        }
-        else
-        {
-            strs << std::setprecision(6) << std::fixed << (double)poseLogTimes.at(i) / 1000000.0 << " ";
-        }
-
-        Eigen::Vector3f trans = poseGraph.at(i).second.topRightCorner(3, 1);
-        Eigen::Matrix3f rot = poseGraph.at(i).second.topLeftCorner(3, 3);
-
-        f << strs.str() << trans(0) << " " << trans(1) << " " << trans(2) << " ";
-
-        Eigen::Quaternionf currentCameraRotation(rot);
-
-        f << currentCameraRotation.x() << " " << currentCameraRotation.y() << " " << currentCameraRotation.z() << " " << currentCameraRotation.w() << "\n";
-    }
-
-    f.close();
 
     for(std::map<std::string, GPUTexture*>::iterator it = textures.begin(); it != textures.end(); ++it)
     {
