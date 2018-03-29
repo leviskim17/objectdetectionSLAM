@@ -3,3 +3,4 @@ deps/
 .project
 .cproject
 *.user
+*.freiburg
