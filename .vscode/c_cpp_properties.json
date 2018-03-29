@@ -35,7 +35,8 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/Core/src"
+                "${workspaceRoot}/Core/src",
+                "/usr/include/eigen3"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

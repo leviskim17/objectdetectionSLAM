@@ -59,8 +59,8 @@ MainController::MainController(int argc, char * argv[])
     }
 
     confidence = 10.0f;
-    depth = 3.0f;
-    icp = 10.0f;
+    depth = 12.0f;
+    icp = 100.0f;
     icpErrThresh = 5e-05;
     covThresh = 1e-05;
     photoThresh = 115;
@@ -527,12 +527,12 @@ void MainController::run()
             logReader->rewind();
             eFusion->setTick(0);
         }
-/*
+
         if(pangolin::Pushed(*gui->save))
         {
             eFusion->savePly();
         }
-*/
+
         TOCK("GUI");
     }
 }

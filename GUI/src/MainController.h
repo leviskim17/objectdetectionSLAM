@@ -37,14 +37,13 @@ class MainController
 
     private:
         void run();
-
         void loadCalibration(const std::string & filename);
 
         bool good;
-        ElasticFusion * eFusion;
-        GUI * gui;
-        GroundTruthOdometry * groundTruthOdometry;
-        LogReader * logReader;
+        ElasticFusion* eFusion;
+        GUI* gui;
+        GroundTruthOdometry* groundTruthOdometry;
+        LogReader* logReader;
 
         bool iclnuim;
         std::string logFile;
@@ -75,7 +74,6 @@ class MainController
 
         int framesToSkip;
         bool streaming;
-        bool resetButton;
 
         Resize * resizeStream;
 };
