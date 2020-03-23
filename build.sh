@@ -44,21 +44,39 @@ cd ../..
 git clone https://github.com/occipital/OpenNI2.git
 cd OpenNI2
 make -j8
-cd ..
+cd ../
 
-#Actually build ElasticFusion
-cd ../Core
-mkdir build
+git clone https://github.com/martinruenz/densecrf.git
+cd densecrf
+mkdir -p build
 cd build
-cmake ../src
+cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" \
+  ..
 make -j8
-cd ../../GPUTest
-mkdir build
+cd ../..
+
+git clone https://github.com/carlren/gSLICr.git
+cd gSLICr
+mkdir -p build
 cd build
-cmake ../src
+cmake \
+  -DOpenCV_DIR="${OpenCV_DIR}" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCUDA_HOST_COMPILER=/usr/bin/gcc-5 \
+  -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -D_FORCE_INLINES" \
+  ..
 make -j8
-cd ../../GUI
-mkdir build
+cd ../..
+
+cd ..
+mkdir -p build
 cd build
-cmake ../src
+cmake \
+  -DBOOST_ROOT="${BOOST_ROOT}" \
+  -DOpenCV_DIR="${OpenCV_DIR}" \
+  -DPangolin_DIR="${Pangolin_DIR}" \
+  ..
 make -j8
+cd ..

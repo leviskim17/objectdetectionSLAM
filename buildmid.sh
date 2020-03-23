@@ -1,13 +1,11 @@
 #!/bin/bash
 
-#Actually build ElasticFusion
-cd ./Core
-mkdir build
+mkdir -p build
 cd build
-cmake ../src
+cmake \
+  -DBOOST_ROOT="${BOOST_ROOT}" \
+  -DOpenCV_DIR="${OpenCV_DIR}" \
+  -DPangolin_DIR="${Pangolin_DIR}" \
+  ..
 make -j8
-cd ../../GUI
-mkdir build
-cd build
-cmake ../src
-make -j8
+cd ..
